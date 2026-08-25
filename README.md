@@ -526,7 +526,7 @@ If you find it useful, consider supporting further development.
 
 **PIX - Brazilian method**
 
-**Tipa aí**: https://tipa.ai/maj0r
+**LivePix**: https://livepix.gg/notmaj0r
 
 **Donate via Crypto**
 
@@ -549,8 +549,12 @@ If you find it useful, consider supporting further development.
 - **[Ps5-Payload-Dev](https://github.com/ps5-payload-dev)** — for the [SDK](https://github.com/ps5-payload-dev/sdk) Prospero is built with; [elfldr](https://github.com/ps5-payload-dev/elfldr), the loader every payload launch streams through; the bundled [ftpsrv](https://github.com/ps5-payload-dev/ftpsrv) and [klogsrv](https://github.com/ps5-payload-dev/klogsrv) payloads (shipped unmodified); and the [offact](https://github.com/ps5-payload-dev/offact) project, used as a reference.
 - **[Sonic-Iso](https://git.etawen.dev/soniciso)** — for the [elf-arsenal](https://git.etawen.dev/soniciso/elf-arsenal) project, used as a reference.
 - **VoidWhisper** — for the VoidShell project, used as a reference.
-- **[PLK](https://github.com/itsPLK)** — for the [ps5-payload-manager](https://github.com/itsPLK/ps5-payload-manager) project, used as a reference.
+- **[PLK](https://github.com/itsPLK)** — for [PS5-Lapy-JB-Daemon](https://github.com/itsPLK/PS5-Lapy-JB-Daemon) and the [ps5-payload-manager](https://github.com/itsPLK/ps5-payload-manager) project, used as a reference.
 - **[Earthonion](https://git.etawen.dev/earthonion)** — for the [np-fake-signin](https://git.etawen.dev/earthonion/np-fake-signin) and [garlic-savemgr](https://git.etawen.dev/earthonion/garlic-savemgr) projects, used as a reference. 
+- **[phantomptr](https://github.com/phantomptr)** — for [ps5upload](https://github.com/phantomptr/ps5upload), used as a PS5 transfer and integration reference.
+- **[owendswang](https://github.com/owendswang)** — for [PS5 Web File Manager](https://github.com/owendswang/ps5-web-file-manager) and [ps5-fan-control](https://github.com/owendswang/ps5-fan-control), used as file-management and fan-control references.
+- **[seregonwar](https://github.com/seregonwar)** — for [zftpd](https://github.com/seregonwar/zftpd), used as a PS5 networking and transfer reference.
+- **[drakmor](https://github.com/drakmor)** — for [fan_target](https://github.com/drakmor/fan_target) and [ps5-hwinfo](https://github.com/drakmor/ps5-hwinfo), used as fan-control safety and hardware-telemetry references.
 - **[Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)** — the HTTP server used by the backend.
 - Everyone testing, reporting issues, sharing logs, and helping improve the project.
 

@@ -1,0 +1,19 @@
+# Build output — see Makefile.
+build/
+
+# Tile PKG build output — see pkg-source/README.md.
+dist/
+
+# Frontend
+source/frontend/node_modules/
+source/frontend/dist/
+
+# Local dev scratch
+*.log
+
+# Ad-hoc test/diagnostic files — keep these local, never commit them.
+*_test.c
+*_test.cpp
+*-test.elf
+test_*.c
+test_*.cpp

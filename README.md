@@ -20,16 +20,17 @@
 
 **Prospero Manager** runs as a single ELF on an already-jailbroken PS5 and serves its complete interface over HTTP.
 
-Send `ProsperoMgr.elf` to the console, open the PS5 IP address in a browser, and manage the system from a PC, tablet, or smartphone.
+No desktop client is required. Send `ProsperoMgr.elf` to the console, open the PS5 IP address in a browser, and manage the system from a desktop, tablet, or smartphone.
 
 Prospero brings the most common PS5 homebrew-management workflows together in one interface:
 
 - Browse and manage PS5 storage;
-- Upload and download files;
-- Create, inspect, download, and extract ZIP archives;
+- Upload and download large files;
+- Create, inspect, download, and extract ZIP archives — extract RAR archives too, including password-protected ones;
+- Preview images without downloading them;
 - Manage and launch payloads;
 - Browse community payload repositories and track new releases;
-- Install PKG files;
+- Install PKG files, including several at once queued in sequence;
 - Back up and restore save data;
 - Inspect running processes;
 - Configure payload autoload sequences;
@@ -54,12 +55,13 @@ Screenshots can be added here later, for example:
 
 ## ✨ Features
 
-- **Native file manager** — browse internal, USB, and extended storage; upload, download, rename, copy, move, delete, multi-select, and run long operations as background jobs.
+- **Native file manager** — browse internal, USB, and extended storage; upload, download, rename, copy, move, delete, multi-select, keyboard navigation, and run long operations as background jobs.
 - **High-speed transfers** — adaptive resumable uploads, large streamed downloads, PS5-specific socket/file-transfer tuning, and browser-friendly transfer handling.
-- **Archive tools** — streamed and cancelable ZIP creation/extraction, live per-file progress, multiple compression modes, archive inspection, temporary **Download as ZIP**, conflict handling, and ZIP Slip/path-traversal protection.
+- **Archive tools** — streamed and cancelable ZIP creation/extraction, RAR extraction (including password-protected archives), live per-file progress, multiple compression modes, archive inspection, temporary **Download as ZIP**, conflict handling with replace/skip/keep-both, and ZIP Slip/path-traversal protection.
+- **Image preview** — view PNG, JPG, GIF, BMP, and WEBP files without downloading them.
 - **Payload library** — upload and manage local payloads, favorites, enable/disable state, launch/stop actions, and separate visibility for payload-like processes started outside Prospero.
 - **Payload Repositories** — curated community projects grouped by developer, latest-release checks, custom repositories, and direct links to the real upstream GitHub/Gitea project pages.
-- **PKG installer** — install `.pkg` files from PS5 storage or a direct URL.
+- **PKG installer** — install `.pkg` files from PS5 storage, USB/extended storage, a direct URL, or streamed straight from your PC/phone with no temporary copy on the console; queue several packages to install one after another.
 - **Save data** — manual per-title backups, downloadable archives, restore flows, and an optional automatic per-title backup watcher.
 - **Payload Autoloader** — configurable boot sequence with autosave, delays, retries, notifications, and a same-boot guard that prevents duplicate automatic launches after redeploying `ProsperoMgr.elf`.
 - **Process manager** — inspect running processes and stop supported processes when needed.
@@ -68,7 +70,9 @@ Screenshots can be added here later, for example:
 - **Profile tools** — change the foreground user's display name and apply a custom avatar.
 - **16 Languages** — complete UI translation with locale-aware formatting and RTL support for Arabic and Persian.
 - **Responsive interface** — designed for desktop, tablets, and smartphones.
+- **Command palette** — quick keyboard navigation with `Ctrl/Cmd + K`.
 - **Background activity** — persistent progress for transfers, archives, PKG operations, and Autoloader jobs.
+- **Native PS5 notifications** — startup, Autoloader, and job-completion feedback directly on the console.
 
 ---
 
@@ -76,11 +80,13 @@ Screenshots can be added here later, for example:
 
 ### Requirements
 
+Prospero Manager is intended for a PS5 that already has a compatible jailbreak/homebrew environment running.
+
 You will need:
 
 - An already-jailbroken PlayStation 5;
 - A compatible ELF/payload loader;
-- A PC, phone, etc... on the same local network as the PS5.
+- A computer, phone, or tablet on the same local network as the console.
 
 ### Run Prospero Manager
 
@@ -92,7 +98,7 @@ ProsperoMgr.elf
 
 to the PS5 using your preferred ELF loader.
 
-Then open the dashboard from another device on the same network (or just use the Prospero Manager PKG):
+Then open the dashboard from another device on the same network:
 
 ```text
 http://<PS5-IP>:7070
@@ -129,10 +135,12 @@ It supports:
 - Rename;
 - Delete;
 - ZIP creation;
-- ZIP extraction;
+- ZIP and RAR extraction, including password-protected RAR archives;
+- Image preview;
 - Download as ZIP;
 - Background file jobs;
 - Progress, speed, and cancellation for long-running operations;
+- Keyboard navigation — arrow keys, Enter, F2 to rename, Delete to remove;
 - Responsive layouts for desktop and mobile devices.
 
 Large uploads use resumable chunking so a long transfer does not need to restart from zero after a recoverable interruption.
@@ -141,9 +149,9 @@ Large downloads are streamed rather than loading the whole file into backend mem
 
 ---
 
-## 📦 ZIP & Archive Tools
+## 📦 ZIP & RAR Archive Tools
 
-Prospero includes a streamed archive engine built around `miniz`.
+Prospero includes a streamed archive engine built around `miniz` for ZIP, and the UnRAR library for RAR extraction.
 
 Archive operations are background jobs and do not require the whole archive to be loaded into memory.
 
@@ -164,23 +172,26 @@ Available compression modes include:
 - **Fast** — fast Deflate compression;
 - **Balanced** — more compression at a higher CPU cost.
 
-### Extract ZIP
+### Extract ZIP / RAR
 
 Prospero can:
 
 - Inspect archive metadata before extraction;
 - Extract into a dedicated folder or selected destination;
+- Prompt for a password when a RAR archive is encrypted;
 - Report per-file progress;
 - Preserve empty directories;
 - Cancel a large extraction;
-- Handle destination conflicts;
+- Handle destination conflicts — replace, skip, keep both, or cancel;
 - Optionally delete the source archive after a successful extraction.
+
+RAR archives can only be extracted, not created — that's an UnRAR license restriction, not a Prospero limitation.
 
 Archive paths are validated before writing to disk to prevent ZIP Slip/path-traversal entries from escaping the selected destination.
 
 ### Open Archive
 
-ZIP files can be inspected without extracting the whole archive first.
+ZIP and RAR files can both be inspected without extracting the whole archive first.
 
 The archive inspector can show the archive structure and metadata and then hand off to the normal extraction workflow.
 
@@ -210,6 +221,8 @@ It supports:
 - Background launch feedback.
 
 Payload-like processes that are already running but are not registered in Prospero can be shown separately so they are not confused with locally-managed payload files.
+
+The payloads directory itself is configurable from `Settings → General → Payloads directory` — point it at a folder already used by another homebrew manager instead of keeping a separate copy of every payload. Takes effect after restarting `ProsperoMgr.elf`.
 
 Prospero intentionally keeps the primary action hierarchy simple:
 
@@ -248,8 +261,11 @@ Prospero can install `.pkg` files using multiple workflows.
 
 Supported sources include:
 
-- A PKG already present on PS5 storage;
-- A direct URL.
+- A PKG already present on internal, USB, or extended PS5 storage;
+- A direct URL, streamed without downloading the whole package first;
+- Directly from a PC or phone on the same network — streamed straight into RAM, with no temporary copy written to the console first.
+
+Select several PKGs at once, from any mix of sources, and they queue and install one after another automatically.
 
 Large PKG transfer/staging work is kept separate from the final PS5 installation stage.
 
@@ -549,13 +565,14 @@ If you find it useful, consider supporting further development.
 - **[Ps5-Payload-Dev](https://github.com/ps5-payload-dev)** — for the [SDK](https://github.com/ps5-payload-dev/sdk) Prospero is built with; [elfldr](https://github.com/ps5-payload-dev/elfldr), the loader every payload launch streams through; the bundled [ftpsrv](https://github.com/ps5-payload-dev/ftpsrv) and [klogsrv](https://github.com/ps5-payload-dev/klogsrv) payloads (shipped unmodified); and the [offact](https://github.com/ps5-payload-dev/offact) project, used as a reference.
 - **[Sonic-Iso](https://git.etawen.dev/soniciso)** — for the [elf-arsenal](https://git.etawen.dev/soniciso/elf-arsenal) project, used as a reference.
 - **VoidWhisper** — for the VoidShell project, used as a reference.
-- **[PLK](https://github.com/itsPLK)** — for [PS5-Lapy-JB-Daemon](https://github.com/itsPLK/PS5-Lapy-JB-Daemon) and the [ps5-payload-manager](https://github.com/itsPLK/ps5-payload-manager) project, used as a reference.
+- **[PLK](https://github.com/itsPLK)** — for [PS5-Lapy-JB-Daemon](https://github.com/itsPLK/PS5-Lapy-JB-Daemon), [ps5-payload-manager](https://github.com/itsPLK/ps5-payload-manager), and [ps5-pkg-manager](https://github.com/itsPLK/ps5-pkg-manager), used as a reference.
 - **[Earthonion](https://git.etawen.dev/earthonion)** — for the [np-fake-signin](https://git.etawen.dev/earthonion/np-fake-signin) and [garlic-savemgr](https://git.etawen.dev/earthonion/garlic-savemgr) projects, used as a reference. 
 - **[phantomptr](https://github.com/phantomptr)** — for [ps5upload](https://github.com/phantomptr/ps5upload), used as a PS5 transfer and integration reference.
 - **[owendswang](https://github.com/owendswang)** — for [PS5 Web File Manager](https://github.com/owendswang/ps5-web-file-manager) and [ps5-fan-control](https://github.com/owendswang/ps5-fan-control), used as file-management and fan-control references.
 - **[seregonwar](https://github.com/seregonwar)** — for [zftpd](https://github.com/seregonwar/zftpd), used as a PS5 networking and transfer reference.
 - **[drakmor](https://github.com/drakmor)** — for [fan_target](https://github.com/drakmor/fan_target) and [ps5-hwinfo](https://github.com/drakmor/ps5-hwinfo), used as fan-control safety and hardware-telemetry references.
 - **[Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)** — the HTTP server used by the backend.
+- **[Alexander Roshal / RARLab](https://www.rarlab.com/)** — for [UnRAR](https://www.rarlab.com/rar_add.htm), the library RAR extraction is built on. See `source/backend/third_party/unrar/license.txt` for its license terms.
 - Everyone testing, reporting issues, sharing logs, and helping improve the project.
 
 ---

@@ -224,6 +224,8 @@ Payload-like processes that are already running but are not registered in Prospe
 
 The payloads directory itself is configurable from `Settings → General → Payloads directory` — point it at a folder already used by another homebrew manager instead of keeping a separate copy of every payload. Takes effect after restarting `ProsperoMgr.elf`.
 
+Subdirectories are scanned too, so Payload Manager's `/data/pldmgr/payloads/<name>/<name>.elf` layout can be used directly without importing or copying files. Payloads are still identified by filename: a file in the root takes precedence over nested copies with the same filename; otherwise the first path in lexicographic order is used. Renaming or deleting a shared payload changes the original file used by the other manager.
+
 Prospero intentionally keeps the primary action hierarchy simple:
 
 - **Launch** when a payload is available;

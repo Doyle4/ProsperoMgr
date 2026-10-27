@@ -138,7 +138,11 @@ void ScanDir(const std::string &dir, bool bundled, std::vector<PayloadInfo> *out
     std::error_code ec;
     if (!fs::exists(dir, ec) || !fs::is_directory(dir, ec)) return;
 
-    for (const auto &entry : fs::directory_iterator(dir, ec)) {
+    // Payload Manager keeps each payload in its own subdirectory. Do not follow
+    // directory symlinks, which could lead outside the shared library or loop.
+    fs::recursive_directory_iterator it(dir, fs::directory_options::skip_permission_denied, ec), end;
+    for (; !ec && it != end; it.increment(ec)) {
+        const auto &entry = *it;
         if (!entry.is_regular_file(ec)) continue;
         if (!IsElf(entry.path())) continue;
         if (bundled && IsPrivateBundledHelper(entry.path())) continue;
@@ -169,6 +173,15 @@ std::vector<PayloadInfo> PayloadRegistry::List() const {
     ScanDir(cfg_.bundled_dir, /*bundled=*/true, &out);
     std::vector<PayloadInfo> imported;
     ScanDir(cfg_.payloads_dir, /*bundled=*/false, &imported);
+    // Keep filename-based identity: flat uploads take precedence over nested
+    // copies; duplicate nested filenames resolve consistently by path.
+    const auto root = fs::absolute(cfg_.payloads_dir).lexically_normal();
+    std::sort(imported.begin(), imported.end(), [&](const PayloadInfo &a, const PayloadInfo &b) {
+        bool a_flat = fs::path(a.path).parent_path().lexically_normal() == root;
+        bool b_flat = fs::path(b.path).parent_path().lexically_normal() == root;
+        if (a_flat != b_flat) return a_flat;
+        return a.path < b.path;
+    });
     // An uploaded payload deliberately shadows a bundled one with the same name;
     // deleting the override reveals the bundled copy again.
     for (auto &candidate : imported) {
@@ -176,7 +189,7 @@ std::vector<PayloadInfo> PayloadRegistry::List() const {
             return item.name == candidate.name;
         });
         if (existing == out.end()) out.push_back(std::move(candidate));
-        else *existing = std::move(candidate);
+        else if (existing->bundled) *existing = std::move(candidate);
     }
 
     auto disabled = LoadDisabled(cfg_);
@@ -265,7 +278,15 @@ bool PayloadRegistry::Delete(const std::string &name, std::string *err) const {
         return false;
     }
 
-    fs::path path = fs::path(cfg_.payloads_dir) / name;
+    std::string resolved;
+    for (const auto &info : List()) {
+        if (info.name == name && !info.bundled) { resolved = info.path; break; }
+    }
+    if (resolved.empty()) {
+        if (err) *err = "payload not found in payloads_dir (bundled payloads can't be deleted): " + name;
+        return false;
+    }
+    fs::path path = resolved;
     std::error_code ec;
     if (!fs::exists(path, ec)) {
         if (err) *err = "payload not found in payloads_dir (bundled payloads can't be deleted): " + name;
@@ -388,8 +409,14 @@ bool PayloadRegistry::Rename(const std::string &name, const std::string &new_nam
         return false;
     }
     if (name == new_name) return true;
-    fs::path source = fs::path(cfg_.payloads_dir) / name;
-    fs::path destination = fs::path(cfg_.payloads_dir) / new_name;
+    std::string resolved;
+    for (const auto &info : List()) {
+        if (info.name == new_name) { if (err) *err = "a payload with that name already exists"; return false; }
+        if (info.name == name && !info.bundled) resolved = info.path;
+    }
+    if (resolved.empty()) { if (err) *err = "only uploaded payloads can be renamed"; return false; }
+    fs::path source = resolved;
+    fs::path destination = source.parent_path() / new_name;
     std::error_code ec;
     if (!fs::is_regular_file(source, ec)) { if (err) *err = "only uploaded payloads can be renamed"; return false; }
     ec.clear();
